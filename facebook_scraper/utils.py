@@ -1,21 +1,28 @@
-import codecs
-import re
-from datetime import datetime, timedelta
 import calendar
+import codecs
+import json
+import logging
+import re
+import time
+import traceback
+from datetime import datetime, timedelta
 from typing import Optional
-from urllib.parse import parse_qsl, unquote, urlencode, urljoin, urlparse, urlunparse
+from urllib.parse import (
+    parse_qsl,
+    unquote,
+    urlencode,
+    urljoin,  # noqa: F401
+    urlparse,
+    urlunparse,
+)
 
 import dateparser
 import lxml.html
 from bs4 import BeautifulSoup
 from requests.cookies import RequestsCookieJar
 from requests_html import DEFAULT_URL, Element, PyQuery
-import json
-import traceback
 
 from . import exceptions
-import logging
-import time
 
 logger = logging.getLogger(__name__)
 
@@ -92,6 +99,7 @@ def remove_control_characters(html):
     """
     Strip invalid XML characters that `lxml` cannot parse.
     """
+
     # See: https://github.com/html5lib/html5lib-python/issues/96
     #
     # The XML 1.0 spec defines the valid character range as:
@@ -263,7 +271,7 @@ def parse_cookie_file(filename: str) -> RequestsCookieJar:
 
             try:
                 domain, _, path, secure, expires, name, value = line.split('\t')
-            except Exception as e:
+            except Exception:
                 raise exceptions.InvalidCookies(f"Can't parse line {i + 1}: '{line}'")
             secure = secure.lower() == 'true'
             expires = None if expires == '0' else int(expires)
