@@ -10,9 +10,7 @@
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-
 Scrape Facebook public pages without an API key. Inspired by [twitter-scraper](https://github.com/kennethreitz/twitter-scraper).
-
 
 ## Install
 
@@ -25,7 +23,7 @@ pip install facebook-scraper
 Or, to install the latest master branch:
 
 ```sh
-pip install git+https://github.com/kevinzg/facebook-scraper.git
+pip install -e git+https://github.com/X-Veloper/facebook-scraper@master#egg=facebook-scraper
 ```
 
 ## Usage
@@ -41,7 +39,6 @@ Send the unique **page name, profile name, or ID** as the first parameter and yo
 The final step on the road to the Super Smash Bros
 We’re headed to PAX East 3/28-3/31 with new games
 ```
-
 
 ### Optional parameters
 
@@ -60,10 +57,10 @@ We’re headed to PAX East 3/28-3/31 with new games
   - A dictionary that can be converted to a CookieJar with [cookiejar_from_dict](https://2.python-requests.org/en/master/api/#requests.cookies.cookiejar_from_dict)
   - The string `"from_browser"` to try extract Facebook cookies from your browser
 - **options**: Dictionary of options. Set `options={"comments": True}` to extract comments, set `options={"reactors": True}` to extract the people reacting to the post.
-Both `comments` and `reactors` can also be set to a number to set a limit for the amount of comments/reactors to retrieve.
-Set `options={"progress": True}` to get a `tqdm` progress bar while extracting comments and replies.
-Set `options={"allow_extra_requests": False}` to disable making extra requests when extracting post data (required for some things like full text and image links).
-Set `options={"posts_per_page": 200}` to request 200 posts per page. The default is 4.
+  Both `comments` and `reactors` can also be set to a number to set a limit for the amount of comments/reactors to retrieve.
+  Set `options={"progress": True}` to get a `tqdm` progress bar while extracting comments and replies.
+  Set `options={"allow_extra_requests": False}` to disable making extra requests when extracting post data (required for some things like full text and image links).
+  Set `options={"posts_per_page": 200}` to request 200 posts per page. The default is 4.
 
 ## CLI usage
 
@@ -158,7 +155,6 @@ for comment in comments:
  'w3_fb_url': 'https://www.facebook.com/Nintendo/posts/2257188721032235'}
 ```
 
-
 ### Notes
 
 - There is no guarantee that every field will be extracted (they might be `None`).
@@ -170,14 +166,16 @@ for comment in comments:
 
 ## Profiles
 
-The `get_profile` function can extract information from a profile's about section. Pass in the account name or ID as the first parameter.  
+The `get_profile` function can extract information from a profile's about section. Pass in the account name or ID as the first parameter.
 Note that Facebook serves different information depending on whether you're logged in (cookies parameter), such as Date of birth and Gender. Usage:
 
 ```python
 from facebook_scraper import get_profile
 get_profile("zuck") # Or get_profile("zuck", cookies="cookies.txt")
 ```
+
 Outputs:
+
 ```python
 {'About': "I'm trying to make the world a more open place.",
  'Education': 'Harvard University\n'
@@ -218,7 +216,7 @@ To extract friends, pass the argument `friends=True`, or to limit the amount of 
 
 ## Group info
 
-The `get_group_info` function can extract info about a group. Pass in the group name or ID as the first parameter.  
+The `get_group_info` function can extract info about a group. Pass in the group name or ID as the first parameter.
 Note that in order to see the list of admins, you need to be logged in (cookies parameter).
 
 Usage:
@@ -250,7 +248,6 @@ Output:
 - ~~Profiles or post authors~~ (`get_profile()`)
 - ~~Comments~~ (with `options={'comments': True}`)
 
-
 ## Alternatives and related projects
 
 - [facebook-post-scraper](https://github.com/brutalsavage/facebook-post-scraper). Has comments. Uses Selenium.
@@ -259,6 +256,6 @@ Output:
 - [Unofficial APIs](https://github.com/Rolstenhouse/unofficial-apis). List of unofficial APIs for various services, none for Facebook for now, but might be worth to check in the future.
 - [major-scrapy-spiders](https://github.com/talhashraf/major-scrapy-spiders). Has a profile spider for Scrapy.
 - [facebook-page-post-scraper](https://github.com/minimaxir/facebook-page-post-scraper). Seems abandoned.
-    - [FBLYZE](https://github.com/isaacmg/fb_scraper). Fork (?).
+  - [FBLYZE](https://github.com/isaacmg/fb_scraper). Fork (?).
 - [RSSHub](https://github.com/DIYgod/RSSHub/blob/master/lib/routes/facebook/page.js). Generates an RSS feed from Facebook pages.
 - [RSS-Bridge](https://github.com/RSS-Bridge/rss-bridge/blob/master/bridges/FacebookBridge.php). Also generates RSS feeds from Facebook pages.
