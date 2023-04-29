@@ -2,25 +2,24 @@ import csv
 import json
 import locale
 import logging
+import os
 import pathlib
-import sys
-import warnings
 import pickle
+import re
+import sys
+import time
+import traceback
+import warnings
+from datetime import datetime, timedelta
 from typing import Any, Dict, Iterator, Optional, Set, Union
 
 from requests.cookies import cookiejar_from_dict
 
-from .constants import DEFAULT_REQUESTS_TIMEOUT, DEFAULT_COOKIES_FILE_PATH
-from .facebook_scraper import FacebookScraper
-from .fb_types import Credentials, Post, RawPost, Profile
-from .utils import html_element_to_string, parse_cookie_file
 from . import exceptions
-import traceback
-import time
-from datetime import datetime, timedelta
-import re
-import os
-
+from .constants import DEFAULT_COOKIES_FILE_PATH, DEFAULT_REQUESTS_TIMEOUT
+from .facebook_scraper import FacebookScraper
+from .fb_types import Credentials, Post, Profile, RawPost
+from .utils import html_element_to_string, parse_cookie_file
 
 _scraper = FacebookScraper()
 
@@ -50,7 +49,7 @@ def set_cookies(cookies):
             raise exceptions.InvalidCookies(f"Missing cookies with name(s): {missing_cookies}")
         _scraper.session.cookies.update(cookies)
         if not _scraper.is_logged_in():
-            raise exceptions.InvalidCookies(f"Cookies are not valid")
+            raise exceptions.InvalidCookies("Cookies are not valid")
 
 
 def unset_cookies():
@@ -487,7 +486,7 @@ def write_posts_to_csv(
             time.sleep(sleep)
     except KeyboardInterrupt:
         pass
-    except Exception as e:
+    except Exception:
         traceback.print_exc()
 
     if kwargs.get("format") == "json":
@@ -517,7 +516,9 @@ def enable_logging(level=logging.DEBUG):
     logger.setLevel(level)
 
 
-def use_persistent_session(email: str, password: str, cookies_file_path=DEFAULT_COOKIES_FILE_PATH):
+def use_persistent_session(
+    email: str, password: str, cookies_file_path=DEFAULT_COOKIES_FILE_PATH
+):
     """Login persistently to Facebook and save cookies to a file (default: ".fb-cookies.pckl"). This is highly recommended if you want to scrape several times a day because it will keep your session alive instead of logging in every time (which can be flagged as suspicious by Facebook).
 
     Args:

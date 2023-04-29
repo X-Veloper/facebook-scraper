@@ -1,45 +1,42 @@
 import itertools
+import json
 import logging
-from urllib.parse import urljoin
-import warnings
+import os
 import re
+import warnings
+from datetime import datetime
 from functools import partial
 from typing import Iterator, Union
-import json
-import demjson3 as demjson
-from urllib.parse import parse_qs, urlparse, unquote
-from datetime import datetime
-import os
+from urllib.parse import parse_qs, unquote, urljoin, urlparse
 
+import demjson3 as demjson
 from requests import RequestException
 from requests_html import HTMLSession
 
-from . import utils
+from . import exceptions, utils
 from .constants import (
     DEFAULT_PAGE_LIMIT,
     FB_BASE_URL,
+    FB_MBASIC_BASE_URL,
     FB_MOBILE_BASE_URL,
     FB_W3_BASE_URL,
-    FB_MBASIC_BASE_URL,
 )
 from .extractors import (
-    extract_group_post,
-    extract_post,
-    extract_photo_post,
-    extract_story_post,
     PostExtractor,
+    extract_group_post,
     extract_hashtag_post,
+    extract_photo_post,
+    extract_post,
+    extract_story_post,
 )
 from .fb_types import Post, Profile
 from .page_iterators import (
     iter_group_pages,
+    iter_hashtag_pages,
     iter_pages,
     iter_photos,
     iter_search_pages,
-    iter_hashtag_pages,
 )
-from . import exceptions
-
 
 logger = logging.getLogger(__name__)
 
@@ -270,7 +267,6 @@ class FacebookScraper:
                             url=FB_MOBILE_BASE_URL,
                         )
                         elems = element.find('a.touchable')
-                        html = element.text
                     elif action['cmd'] == 'script':
                         more_url = re.search(
                             r'("\\/timeline\\/app_collection\\/more\\/[^"]+")', action["code"]
@@ -809,7 +805,7 @@ class FacebookScraper:
                     result["other_members"] = [m for m in members if m not in result["admins"]]
                 else:
                     logger.warning("No other members listed")
-        except exceptions.LoginRequired as e:
+        except exceptions.LoginRequired:
             pass
         return result
 
@@ -888,7 +884,6 @@ class FacebookScraper:
                         FB_MOBILE_BASE_URL,
                         f"story.php?story_fbid={post_url}&id=1&m_entstream_source=timeline",
                     )
-                    post = {"original_request_url": post_url, "post_url": url}
                     logger.debug(f"Requesting page from: {url}")
                     response = self.get(url)
             if "/watch/" in response.url:
@@ -909,7 +904,7 @@ class FacebookScraper:
                     f"Facebook served mbasic/noscript content unexpectedly on {response.url}"
                 )
             if response.html.find("h1,h2", containing="Unsupported Browser"):
-                warnings.warn(f"Facebook says 'Unsupported Browser'")
+                warnings.warn("Facebook says 'Unsupported Browser'")
             title = response.html.find("title", first=True)
             not_found_titles = ["page not found", "content not found"]
             temp_ban_titles = [
@@ -1017,7 +1012,6 @@ class FacebookScraper:
         max_past_limit=5,
         **kwargs,
     ):
-
         if options is None:
             options = {}
         elif isinstance(options, set):
@@ -1034,7 +1028,6 @@ class FacebookScraper:
 
         # if latest_date is specified, iterate until the date is reached n times in a row (recurrent_past_posts)
         if latest_date is not None:
-
             # Pinned posts repeat themselves over time, so ignore them
             pinned_posts = []
 
@@ -1048,7 +1041,6 @@ class FacebookScraper:
             done = False
 
             for page in iter_pages_fn():
-
                 for post_element in page:
                     try:
                         post = extract_post_fn(post_element, options=options, request_fn=self.get)

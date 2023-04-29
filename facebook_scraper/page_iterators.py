@@ -2,18 +2,15 @@ import json
 import logging
 import re
 import textwrap
-from typing import Iterator, Optional, Union
 import time
+import warnings
+from typing import Iterator, Optional, Union
 
 from requests.exceptions import HTTPError
-import warnings
 
-from . import utils
-from .constants import FB_MOBILE_BASE_URL, FB_MBASIC_BASE_URL
-
+from . import exceptions, utils
+from .constants import FB_MBASIC_BASE_URL, FB_MOBILE_BASE_URL
 from .fb_types import URL, Page, RawPage, RequestFunction, Response
-from . import exceptions
-
 
 logger = logging.getLogger(__name__)
 
@@ -204,7 +201,7 @@ class PageParser:
                 # Due to malformed HTML served by Facebook, lxml might misinterpret where the footer should go in article elements
                 # If we limit the parsing just to the section element, it fixes it
                 # Please forgive me for parsing HTML with regex
-                logger.warning(f"No footer in article - reparsing HTML within <section> element")
+                logger.warning("No footer in article - reparsing HTML within <section> element")
                 html = re.search(r'<section.+?>(.+)</section>', raw_page.html).group(1)
                 raw_page = utils.make_html_element(html=html)
                 raw_posts = raw_page.find(selection)

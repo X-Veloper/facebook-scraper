@@ -3,7 +3,6 @@ from typing import Any, Callable, Dict, Iterable, Tuple
 from requests import Response
 from requests_html import Element
 
-
 URL = str
 Options = Dict[str, Any]
 Post = Dict[str, Any]

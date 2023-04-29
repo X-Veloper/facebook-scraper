@@ -1,19 +1,19 @@
 import itertools
 import json
-import demjson3 as demjson
-from demjson3 import JSONDecodeError
 import logging
 import re
+from collections import defaultdict
 from datetime import datetime
 from typing import Any, Dict, Optional
 from urllib.parse import parse_qs, urlparse
+
+import demjson3 as demjson
+from demjson3 import JSONDecodeError
 from tqdm.auto import tqdm
-from collections import defaultdict
 
-from . import utils, exceptions
+from . import exceptions, utils
 from .constants import FB_BASE_URL, FB_MOBILE_BASE_URL, FB_W3_BASE_URL
-from .fb_types import Options, Post, RawPost, RequestFunction, Response, URL
-
+from .fb_types import URL, Options, Post, RawPost, RequestFunction, Response
 
 try:
     from youtube_dl import YoutubeDL
@@ -273,7 +273,7 @@ class PostExtractor:
 
         element = self.element
 
-        story_containers = element.find(".story_body_container")  
+        story_containers = element.find(".story_body_container")
 
         has_more = self.more_url_regex.search(element.html)
         if has_more and self.full_post_html:
@@ -282,11 +282,9 @@ class PostExtractor:
                 text = self.full_post_html.find("div.msg", first=True).text
                 return {"text": text, "post_text": text}
 
-        
         texts = defaultdict(str)
 
         for container_index, container in enumerate(story_containers):
-            
             has_translation = self.has_translation_regex.search(container.html)
             if has_translation:
                 original = container.find('div[style="display:none"]', first=True)
@@ -300,7 +298,7 @@ class PostExtractor:
             # Separation between paragraphs
             paragraph_separator = '\n\n'
 
-            for version, content in content_versions: 
+            for version, content in content_versions:
                 post_text = []
                 shared_text = []
                 nodes = content.find('p, header, span[role=presentation]')
@@ -310,7 +308,7 @@ class PostExtractor:
                         post_text.append(content.text)
                     else:
                         shared_text.append(content.text)
-                
+
                 elif nodes:
                     ended = False
                     index_non_header = next(
@@ -336,7 +334,7 @@ class PostExtractor:
                 text = paragraph_separator.join(itertools.chain(post_text, shared_text))
                 post_text = paragraph_separator.join(post_text)
                 shared_text = paragraph_separator.join(shared_text)
-                
+
                 if version in ["original", "hidden_original"]:
                     texts["text"] += text
                     texts["post_text"] += post_text
@@ -345,7 +343,7 @@ class PostExtractor:
                     texts["translated_text"] += text
                     texts["translated_post_text"] += post_text
                     texts["translated_shared_text"] += shared_text
-            
+
         if texts:
             if texts["translated_text"]:
                 texts["original_text"] = texts["text"]
@@ -357,9 +355,6 @@ class PostExtractor:
         elif len(nodes) == 1:
             text = nodes[0].text
             return {'text': text, 'post_text': text}
-
-
-                
 
         return None
 
@@ -457,7 +452,6 @@ class PostExtractor:
         return {"link": link, "links": links}
 
     def extract_post_url(self) -> PartialPost:
-
         query_params = ('story_fbid', 'id')
         account = self.options.get('account')
         elements = self.element.find('a')
@@ -713,7 +707,7 @@ class PostExtractor:
                     logger.error(f"Don't know {emoji_class}")
             except AttributeError:
                 try:
-                    emoji_style = elem.find(f"div>i[style]", first=True).attrs.get("style")
+                    emoji_style = elem.find("div>i[style]", first=True).attrs.get("style")
                     emoji_url = utils.get_background_image_url(emoji_style)
                     reaction_type = emoji_url_lookup.get(emoji_url)
                     if not reaction_type:
@@ -763,7 +757,7 @@ class PostExtractor:
                                 logger.error(f"Don't know {emoji_class}")
                         except AttributeError:
                             try:
-                                emoji_style = elem.find(f"div>i[style]", first=True).attrs.get(
+                                emoji_style = elem.find("div>i[style]", first=True).attrs.get(
                                     "style"
                                 )
                                 emoji_url = utils.get_background_image_url(emoji_style)
@@ -1389,7 +1383,7 @@ class PostExtractor:
             logger.debug(f"Fetching {url}")
             try:
                 response = self.request(url)
-            except exceptions.NotFound as e:
+            except exceptions.NotFound:
                 url = self.post.get('post_url').replace(FB_BASE_URL, FB_MOBILE_BASE_URL)
                 logger.debug(f"Fetching {url}")
                 response = self.request(url)

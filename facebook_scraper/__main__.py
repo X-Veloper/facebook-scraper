@@ -1,13 +1,13 @@
 import argparse
+import csv
+import datetime
+import json
+import locale
 import logging
 import pathlib
-import datetime
 import sys
-import locale
-import json
-import csv
 
-from . import enable_logging, write_posts_to_csv, get_profile
+from . import enable_logging, get_profile, write_posts_to_csv
 
 
 def run():

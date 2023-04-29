@@ -7,14 +7,7 @@ import time
 import traceback
 from datetime import datetime, timedelta
 from typing import Optional
-from urllib.parse import (
-    parse_qsl,
-    unquote,
-    urlencode,
-    urljoin,  # noqa: F401
-    urlparse,
-    urlunparse,
-)
+from urllib.parse import parse_qsl, unquote, urlencode, urljoin, urlparse, urlunparse
 
 import dateparser
 import lxml.html
